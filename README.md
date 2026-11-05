@@ -1,8 +1,12 @@
 # Sitio web de Jetra Apps
 
 Sitio estático (HTML + CSS, sin dependencias) con la portada del estudio y las
-páginas de Pixforma. Español e inglés con selector de idioma; la app abre las
-páginas con `?lang=xx` para mostrarlas en su idioma.
+páginas de cada app:
+
+- **Pixforma:** español e inglés con selector de idioma; la app abre las
+  páginas con `?lang=xx` para mostrarlas en su idioma.
+- **Sofa RC:** copiadas de `remote-control/docs` (5 idiomas y formulario de
+  comentarios con Firestore), con el desarrollador y el correo de Jetra Apps.
 
 | Página | URL publicada |
 |---|---|
@@ -11,6 +15,9 @@ páginas con `?lang=xx` para mostrarlas en su idioma.
 | Soporte | https://jeater.github.io/pixforma/support.html |
 | Política de privacidad | https://jeater.github.io/pixforma/privacy.html |
 | Términos de uso | https://jeater.github.io/pixforma/terms.html |
+| Sofa RC | https://jeater.github.io/sofa-rc/ |
+| Sofa RC · Privacidad | https://jeater.github.io/sofa-rc/privacy/ |
+| Sofa RC · Comentarios | https://jeater.github.io/sofa-rc/feedback/ |
 
 La app usa estas URLs desde `lib/services/support_service.dart` (`Support.siteBase`).
 
