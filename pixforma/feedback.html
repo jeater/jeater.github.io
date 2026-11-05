@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pixforma</title>
+  <link rel="icon" href="icon.png">
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* Esta página traduce sus textos con JS (8 idiomas), no con data-lang. */
+    form { display: grid; gap: 16px; margin-top: 24px; }
+    label { display: grid; gap: 6px; font-weight: 600; }
+    input, textarea {
+      font: inherit; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); width: 100%;
+    }
+    input:focus, textarea:focus { outline: 2px solid var(--primary); border-color: transparent; }
+    textarea { min-height: 160px; resize: vertical; }
+    .count { font-weight: 400; color: var(--muted); font-size: .85rem; justify-self: end; }
+    button[type=submit] {
+      font: inherit; font-weight: 700; padding: 14px; border: 0; border-radius: 12px; cursor: pointer;
+      color: #fff; background: linear-gradient(135deg, var(--primary), var(--primary-2));
+    }
+    button[type=submit]:disabled { opacity: .6; cursor: default; }
+    .status { min-height: 1.4em; margin: 0; }
+    .status.ok { color: #16a34a; font-weight: 600; }
+    .status.error { color: #dc2626; font-weight: 600; }
+    .meta { color: var(--muted); font-size: .85rem; margin: 0; }
+    .trap { position: absolute; left: -10000px; width: 1px; height: 1px; opacity: 0; }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <div class="wrap">
+      <a class="brand" href="./"><img src="icon.png" alt="">Pixforma</a>
+      <nav>
+        <a href="support.html" data-t="help"></a>
+        <a href="privacy.html" data-t="privacy"></a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <article class="doc">
+      <h1 data-t="title"></h1>
+      <p data-t="intro"></p>
+
+      <form id="form" novalidate>
+        <label><span data-t="email"></span>
+          <input id="email" type="email" maxlength="254" autocomplete="email" required>
+        </label>
+        <label><span data-t="subject"></span>
+          <input id="subject" type="text" maxlength="120" required>
+        </label>
+        <label><span data-t="message"></span>
+          <textarea id="message" maxlength="2000" required></textarea>
+          <span class="count" id="count">0 / 2000</span>
+        </label>
+        <input class="trap" id="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <p class="meta" id="meta"></p>
+        <button id="send" type="submit" data-t="send"></button>
+        <p class="status" id="status" role="status"></p>
+      </form>
+
+      <p class="meta" style="margin-top:24px"><span data-t="orEmail"></span> <a href="mailto:jetra.apps@gmail.com">jetra.apps@gmail.com</a></p>
+    </article>
+  </main>
+
+  <footer class="site">
+    <div class="wrap">
+      <span>© 2026 <a href="../">Jetra Apps</a></span>
+      <span><a href="privacy.html" data-t="privacy"></a> · <a href="terms.html" data-t="terms"></a></span>
+    </div>
+  </footer>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js';
+  import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js';
+
+  // Configuración web pública: el acceso lo controla firestore.rules
+  // (solo crear, con app == 'pixforma'; nada se puede leer desde aquí).
+  const app = initializeApp({
+    apiKey: 'AIzaSyA49rRWUKDOMamcmQ3zD41QbiMYAWYdLL8',
+    authDomain: 'pixforma-jetra.firebaseapp.com',
+    projectId: 'pixforma-jetra',
+    appId: '1:1056865742122:web:b6e3c6e180a32f3dd64253',
+  });
+  const db = getFirestore(app);
+
+  const strings = {
+    es: { title: 'Enviar comentarios', intro: '¿Una idea, un problema o algo que no se convierte bien? Cuéntanos.', email: 'Tu correo', subject: 'Asunto', message: 'Comentario', send: 'Enviar', sending: 'Enviando…', sent: '¡Gracias! Recibimos tu mensaje y te responderemos pronto.', invalid: 'Escribe un correo válido, un asunto y un comentario.', failed: 'No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.', meta: 'Se incluirá automáticamente:', orEmail: '¿Prefieres el correo? Escríbenos a', help: 'Ayuda', privacy: 'Política de privacidad', terms: 'Términos de uso' },
+    en: { title: 'Send feedback', intro: 'An idea, a problem, or something that doesn’t convert well? Tell us.', email: 'Your email', subject: 'Subject', message: 'Comment', send: 'Send', sending: 'Sending…', sent: 'Thanks! We got your message and will reply soon.', invalid: 'Please enter a valid email, a subject and a comment.', failed: 'Couldn’t send. Check your connection and try again.', meta: 'Automatically included:', orEmail: 'Prefer email? Write to', help: 'Help', privacy: 'Privacy policy', terms: 'Terms of use' },
+    pt: { title: 'Enviar comentários', intro: 'Uma ideia, um problema ou algo que não converte bem? Conte para nós.', email: 'Seu e-mail', subject: 'Assunto', message: 'Comentário', send: 'Enviar', sending: 'Enviando…', sent: 'Obrigado! Recebemos sua mensagem e responderemos em breve.', invalid: 'Informe um e-mail válido, um assunto e um comentário.', failed: 'Não foi possível enviar. Verifique a conexão e tente novamente.', meta: 'Incluído automaticamente:', orEmail: 'Prefere e-mail? Escreva para', help: 'Ajuda', privacy: 'Política de privacidade', terms: 'Termos de uso' },
+    fr: { title: 'Envoyer un avis', intro: 'Une idée, un problème ou une conversion qui se passe mal ? Dites-le-nous.', email: 'Votre e-mail', subject: 'Objet', message: 'Commentaire', send: 'Envoyer', sending: 'Envoi…', sent: 'Merci ! Nous avons bien reçu votre message et répondrons bientôt.', invalid: 'Saisissez un e-mail valide, un objet et un commentaire.', failed: "Échec de l'envoi. Vérifiez votre connexion et réessayez.", meta: 'Inclus automatiquement :', orEmail: 'Vous préférez l’e-mail ? Écrivez à', help: 'Aide', privacy: 'Confidentialité', terms: "Conditions d'utilisation" },
+    de: { title: 'Feedback senden', intro: 'Eine Idee, ein Problem oder etwas, das nicht richtig konvertiert? Schreib uns.', email: 'Deine E-Mail', subject: 'Betreff', message: 'Kommentar', send: 'Senden', sending: 'Wird gesendet…', sent: 'Danke! Deine Nachricht ist angekommen, wir antworten bald.', invalid: 'Bitte gib eine gültige E-Mail, einen Betreff und einen Kommentar ein.', failed: 'Senden fehlgeschlagen. Prüfe deine Verbindung und versuche es erneut.', meta: 'Wird automatisch mitgesendet:', orEmail: 'Lieber per E-Mail? Schreib an', help: 'Hilfe', privacy: 'Datenschutz', terms: 'Nutzungsbedingungen' },
+    it: { title: 'Invia feedback', intro: 'Un’idea, un problema o qualcosa che non si converte bene? Raccontacelo.', email: 'La tua email', subject: 'Oggetto', message: 'Commento', send: 'Invia', sending: 'Invio…', sent: 'Grazie! Abbiamo ricevuto il tuo messaggio e ti risponderemo presto.', invalid: 'Inserisci un’email valida, un oggetto e un commento.', failed: 'Invio non riuscito. Controlla la connessione e riprova.', meta: 'Incluso automaticamente:', orEmail: 'Preferisci l’email? Scrivi a', help: 'Aiuto', privacy: 'Privacy', terms: 'Termini di utilizzo' },
+    zh: { title: '发送反馈', intro: '有想法、遇到问题，或某张图片转换效果不好？告诉我们。', email: '你的邮箱', subject: '主题', message: '内容', send: '发送', sending: '正在发送…', sent: '谢谢！我们已收到你的消息，会尽快回复。', invalid: '请输入有效的邮箱、主题和内容。', failed: '发送失败，请检查网络后重试。', meta: '将自动附带：', orEmail: '更喜欢用邮件？请发送至', help: '帮助', privacy: '隐私政策', terms: '使用条款' },
+    ja: { title: 'フィードバックを送信', intro: 'アイデア、不具合、うまく変換できない画像などがあれば教えてください。', email: 'メールアドレス', subject: '件名', message: '内容', send: '送信', sending: '送信中…', sent: 'ありがとうございます！メッセージを受け取りました。近日中に返信します。', invalid: '有効なメールアドレス、件名、内容を入力してください。', failed: '送信できませんでした。接続を確認して再度お試しください。', meta: '自動で添付される情報：', orEmail: 'メールの方がよければ', help: 'ヘルプ', privacy: 'プライバシーポリシー', terms: '利用規約' },
+  };
+
+  // ?lang=xx (lo envía la app) tiene prioridad sobre el idioma del navegador.
+  // La app también envía ?v=versión&d=dispositivo&p=plataforma.
+  const params = new URLSearchParams(location.search);
+  const wanted = (params.get('lang') || navigator.language || 'en').slice(0, 2).toLowerCase();
+  const lang = wanted in strings ? wanted : 'en';
+  const t = strings[lang];
+  const clip = (s, n) => (s || '').toString().slice(0, n);
+  const context = {
+    appVersion: clip(params.get('v'), 40),
+    device: clip(params.get('d'), 120),
+    platform: clip(params.get('p'), 20),
+  };
+
+  document.documentElement.lang = lang;
+  document.title = `Pixforma · ${t.title}`;
+  document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = t[el.dataset.t]; });
+
+  const $ = (id) => document.getElementById(id);
+  const parts = [context.appVersion && `Pixforma ${context.appVersion}`, context.device, lang.toUpperCase()].filter(Boolean);
+  $('meta').textContent = context.appVersion ? `${t.meta} ${parts.join(' · ')}` : '';
+
+  const status = (text, kind = '') => { $('status').textContent = text; $('status').className = `status ${kind}`; };
+  $('message').addEventListener('input', () => { $('count').textContent = `${$('message').value.length} / 2000`; });
+
+  $('form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = $('email').value.trim();
+    const subject = $('subject').value.trim();
+    const message = $('message').value.trim();
+    if ($('website').value) { status(t.sent, 'ok'); return; } // trampa para bots
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) || !subject || !message) { status(t.invalid, 'error'); return; }
+
+    $('send').disabled = true;
+    status(t.sending);
+    try {
+      const doc = { app: 'pixforma', email, subject, message, lang, createdAt: serverTimestamp() };
+      for (const [k, v] of Object.entries(context)) if (v) doc[k] = v;
+      await addDoc(collection(db, 'feedback'), doc);
+      $('form').reset();
+      $('count').textContent = '0 / 2000';
+      status(t.sent, 'ok');
+    } catch (err) {
+      console.error(err);
+      status(t.failed, 'error');
+    } finally {
+      $('send').disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
